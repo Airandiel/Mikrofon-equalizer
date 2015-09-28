@@ -182,6 +182,7 @@ int main()
 		}
 
 		// Once the user hits escape, stop recording, and clean up
+
 		waveInStop(wi);
 		for (auto& h : headers)
 		{
