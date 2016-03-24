@@ -19,28 +19,33 @@ using namespace std;
 int main()
 {
 	srand(time(NULL));
-	int width = 600;
-	int high = 480;
+	int width = 1360;
+	int high = 720;
 	int length = (width * 2) / 3;
-	double scale = 0.25;
+	//double scale =0.2;
+	double scale = 0.005;
+	//double scale = 0.145;
+	//int cuts = 00;
+	int cuts = 350;
 	//const int frequency = 44100;
-	const int frequency = 128;
+	const int frequency = 64;
 
 	/*sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;*/
-	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Default);
+	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Fullscreen);
 	sf::CircleShape shape(10.f);
 	shape.setFillColor(sf::Color::Green);
 	
 	vector <uint16_t> tab;
 	//queue <uint16_t> qu;
 	for (int i = 0; i < length; i++){
-		tab.push_back(5);
+		tab.push_back(0);
 		//qu.push(high / 2);
 	}
 
 	while (window.isOpen())
 	{
+		int start = clock();
 		/*for (int i = 0; i < (width / 2); i++){
 			sf::Vertex line[] =
 			{
@@ -94,7 +99,7 @@ int main()
 		}
 
 		// In this example, I'm just going to dump the audio data to a binary file
-		std::ofstream outfile("my_recorded_audio.txt", std::ios_base::out | std::ios_base::binary);
+		std::ofstream outfile("my_recorded_audio.bin", std::ios_base::out | std::ios_base::binary);
 
 		// Print some simple directions to the user
 		std::cout << "Now recording audio.  Press Escape to stop and exit." << std::endl;
@@ -105,6 +110,8 @@ int main()
 		{
 			window.close();
 		}
+
+		
 		
 		
 		//shape.setPosition(rand() % width, rand() % high);
@@ -131,29 +138,47 @@ int main()
 					
 					for (uint32_t i = 0; i < frequency; i += 64)
 					{
-						uint16_t temp = 0;
-						temp |= (((uint8_t)*(h.lpData + i + 1))) << 8;
+						uint32_t temp = 0;
+						temp |= (((uint8_t)*(h.lpData + i + 3))) << 24;
+						temp |= (((uint8_t)*(h.lpData + i+2)))<<16;
+						temp |= (((uint8_t)*(h.lpData + i + 1)))<<8;
 						temp |= (((uint8_t)*(h.lpData + i)));
-						if ((int)temp < 65500){
+						if (temp < 4200000000){
 							std::cout << temp << " ";
+							/*if ((int)temp < 200){
+								tab.push_back((int)temp/2);
+							}
+							if ((int)temp > 500){
+								tab.push_back(500);
+							}
+							else{
+								tab.push_back((int)temp);
+							}*/
 							tab.push_back(temp);
 							tab.erase(tab.begin());
 							//qu.push(temp);
 							//qu.pop();
 						}
+						else{
+							tab.push_back(tab[tab.size()-1]);
+							tab.erase(tab.begin());
+						}
+
 						
 						//std::cout << std::fixed << std::setprecision(8) << (int((uint8_t)*(h.lpData + i))) << " ";
 					}
 					
 					for (int i = 0; i < length; i++){
-						sf::RectangleShape line(sf::Vector2f(1, (log(tab[i]) / log(1.1)) / scale));
-						line.setPosition(i, (high / 2)-(log(tab[i])/log(1.1))/(2*scale));
+						sf::RectangleShape line(sf::Vector2f(1, ((log(tab[i]) / log(15))) / scale - cuts));
+						line.setPosition(i, (high / 2) - (log(tab[i]) / log(15)) / (2 * scale) + cuts / 2);
+						//sf::RectangleShape line(sf::Vector2f(1, (((tab[i]) / (10)) / scale - cuts)));
+						//line.setPosition(i, (high / 2) - abs(((tab[i]/10)) / (scale) + cuts / 2)/2);
 						/*sf::RectangleShape line(sf::Vector2f(1, tab[i] / scale));
 						line.setPosition(i, (high / 2)-(tab[i]/(2*scale)));*/
 						line.setFillColor(sf::Color::Green);
 						window.draw(line);						
 					}
-					window.display();
+					
 					/*					for (int i = 0; i < (width / 2); i++){
 											sf::Vertex line[] =
 											{
@@ -179,16 +204,24 @@ int main()
 					waveInAddBuffer(wi, &h, sizeof(h));
 				}
 			}
+
+			int stop = clock();
+			while (stop - start < 50){
+				stop = clock();
+			}
+			start = clock();
+			window.display();
 		}
 
 		// Once the user hits escape, stop recording, and clean up
-
+		window.display();
 		waveInStop(wi);
 		for (auto& h : headers)
 		{
 			waveInUnprepareHeader(wi, &h, sizeof(h));
 		}
 		waveInClose(wi);
+
 	}
 
 	// All done!
