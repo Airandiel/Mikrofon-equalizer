@@ -19,20 +19,27 @@ using namespace std;
 int main()
 {
 	srand(time(NULL));
-	int width = 1360;
-	int high = 720;
+	int width = 800;
+	int high = 600;
 	int length = (width * 2) / 3;
 	//double scale =0.2;
 	double scale = 0.005;
 	//double scale = 0.145;
 	//int cuts = 00;
 	int cuts = 350;
+	int n = 100;
+	vector<double> average;
+	double ave=0;
+	vector<double> aver;
+	int indic = 0;
+	int iter = 0;
+	int endingIndic = 0;
 	//const int frequency = 44100;
 	const int frequency = 64;
 
 	/*sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;*/
-	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Fullscreen);
+	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Default);
 	sf::CircleShape shape(10.f);
 	shape.setFillColor(sf::Color::Green);
 	
@@ -40,7 +47,11 @@ int main()
 	//queue <uint16_t> qu;
 	for (int i = 0; i < length; i++){
 		tab.push_back(0);
+		average.push_back(0);
 		//qu.push(high / 2);
+	}
+	for (int i = 0; i < n; i++){
+		aver.push_back(0);
 	}
 
 	while (window.isOpen())
@@ -63,7 +74,7 @@ int main()
 		//   For this example we'll use "CD quality", ie:  44100 Hz, stereo, 16-bit
 		WAVEFORMATEX wfx = {};
 		wfx.wFormatTag = WAVE_FORMAT_PCM;       // PCM is standard
-		wfx.nChannels = 2;                      // 2 channels = stereo sound
+		wfx.nChannels = 1;                      // 2 channels = stereo sound
 		wfx.nSamplesPerSec = 44100;             // Samplerate.  44100 Hz
 		wfx.wBitsPerSample = 16;                // 16 bit samples
 		// These others are computations:
@@ -138,12 +149,43 @@ int main()
 					
 					for (uint32_t i = 0; i < frequency; i += 64)
 					{
-						uint32_t temp = 0;
-						temp |= (((uint8_t)*(h.lpData + i + 3))) << 24;
-						temp |= (((uint8_t)*(h.lpData + i+2)))<<16;
-						temp |= (((uint8_t)*(h.lpData + i + 1)))<<8;
+						
+						int16_t temp = 0;
+						//temp |= (((uint8_t)*(h.lpData + i + 3))) << 24;
+						//temp |= (((uint8_t)*(h.lpData + i + 2))) << 16;
+						temp |= (((uint8_t)*(h.lpData + i + 1))) << 8;
 						temp |= (((uint8_t)*(h.lpData + i)));
-						if (temp < 4200000000){
+
+						temp = abs(temp);
+						if (iter < n){
+							aver.push_back(temp / n);
+
+							aver.erase(aver.begin());
+							ave += temp / n;
+
+							average.push_back(ave);
+							average.erase(average.begin());
+							iter++;
+						}
+						else{
+							aver.push_back(temp / n);
+
+							ave += aver[aver.size()-1];
+							ave -= aver[0];
+							average.push_back(ave);
+
+							aver.erase(aver.begin());
+							average.erase(average.begin()-1);
+						}
+							temp-=(average[average.size()-1]);
+							temp = abs(temp);
+						if (temp < (0.5 * average[average.size() - 1])){
+							temp /= 5;
+						}
+						if (average[average.size() - 1] < 30000){
+							temp /= 10;
+						}
+						/*if (temp<30000){
 							std::cout << temp << " ";
 							/*if ((int)temp < 200){
 								tab.push_back((int)temp/2);
@@ -153,32 +195,56 @@ int main()
 							}
 							else{
 								tab.push_back((int)temp);
-							}*/
+							}
 							tab.push_back(temp);
 							tab.erase(tab.begin());
 							//qu.push(temp);
 							//qu.pop();
 						}
 						else{
-							tab.push_back(tab[tab.size()-1]);
+							std::cout << tab[tab.size() ] << " ";
+							tab.push_back(tab[tab.size()]);
 							tab.erase(tab.begin());
-						}
+						}*/
 
+						tab.push_back(temp);
+						tab.erase(tab.begin());
 						
 						//std::cout << std::fixed << std::setprecision(8) << (int((uint8_t)*(h.lpData + i))) << " ";
 					}
 					
 					for (int i = 0; i < length; i++){
-						sf::RectangleShape line(sf::Vector2f(1, ((log(tab[i]) / log(15))) / scale - cuts));
-						line.setPosition(i, (high / 2) - (log(tab[i]) / log(15)) / (2 * scale) + cuts / 2);
+						
+						/*sf::RectangleShape line1(sf::Vector2f(1, (average[i])));
+						line1.setPosition(i, (high / 2) - (average[i])/ 2);
+
+						line1.setFillColor(sf::Color::Red);
+						window.draw(line1);*/
+
+						sf::CircleShape circle;
+						circle.setRadius(1);
+						circle.setFillColor(sf::Color::Red);
+						circle.setPosition(i, (high / 2) - (average[i]));
+
+						sf::RectangleShape line1(sf::Vector2f(1, ((log(average[i]) / log(15))) / scale - cuts));
+						line1.setPosition(i, (high / 2) - (log(average[i]) / log(15)) / (2 * scale) + cuts / 2);
+
+						line1.setFillColor(sf::Color::Red);
+						window.draw(line1);
+
+						window.draw(circle);
+
+						sf::RectangleShape line(sf::Vector2f(1, (((log(abs(tab[i] )) / log(15))) / scale - cuts)));
+						line.setPosition(i, ((high / 2) - (log(abs(tab[i] )) / log(15)) / (2 * scale) + cuts / 2));
 						//sf::RectangleShape line(sf::Vector2f(1, (((tab[i]) / (10)) / scale - cuts)));
 						//line.setPosition(i, (high / 2) - abs(((tab[i]/10)) / (scale) + cuts / 2)/2);
 						/*sf::RectangleShape line(sf::Vector2f(1, tab[i] / scale));
 						line.setPosition(i, (high / 2)-(tab[i]/(2*scale)));*/
 						line.setFillColor(sf::Color::Green);
-						window.draw(line);						
+						window.draw(line);	
+
+						
 					}
-					
 					/*					for (int i = 0; i < (width / 2); i++){
 											sf::Vertex line[] =
 											{
