@@ -42,6 +42,10 @@ int main()
 
 	bool autoScale = true;
 
+	bool Avera = false;
+	bool pressedS = false;
+	int starts = clock();;
+	int kons;
 	/*sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;*/
 	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Fullscreen);
@@ -171,6 +175,20 @@ int main()
 				//rotate++;
 				autoScale = true;
 			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && pressedS && (clock()-starts>500))
+			{
+				//rotate++;
+				starts = clock();
+				Avera = false;
+				pressedS = false;
+			}
+			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S) && (clock() - starts>500))
+				{
+					//rotate++;
+					starts = clock();
+					Avera = true;
+					pressedS = true;
+				}
 			window.clear(sf::Color::Black);
 			for (auto& h : headers)      // check each header
 			{
@@ -297,18 +315,13 @@ int main()
 						//line1.setFillColor(sf::Color::Red);
 						//window.draw(line1);
 
-						/*sf::CircleShape circle;
-						circle.setRadius(1);
-						circle.setFillColor(sf::Color::Red);
-						circle.setPosition(i, (high / 2) - (average[i]));
-
+						/*
 						sf::RectangleShape line1(sf::Vector2f(1, ((log(average[i]) / log(15))) / scale - cuts));
 						line1.setPosition(i, (high / 2) - (log(average[i]) / log(15)) / (2 * scale) + cuts / 2);
 
 						line1.setFillColor(sf::Color::Red);
 						window.draw(line1);
-
-						window.draw(circle);*/
+*/
 	
 						/*sf::RectangleShape line(sf::Vector2f(1, (((log((tab[i] )) / log(15))) / scale - cuts)));
 						line.setPosition(i, ((high / 2) - (log((tab[i] )) / log(15)) / (2 * scale) + cuts / 2));*/
@@ -316,11 +329,19 @@ int main()
 						//line.setPosition(i, (high / 2) - abs(((tab[i]/10)) / (scale) + cuts / 2)/2);
 						/*sf::RectangleShape line(sf::Vector2f(1, tab[i] / scale));
 						line.setPosition(i, (high / 2)-(tab[i]/(2*scale)));*/
+						
+
 						sf::RectangleShape line(sf::Vector2f(1, tab[i]*highi/maxi));
 						line.setPosition(i, (high / 2) - tab[i] * highi / (2*maxi));
 						line.setFillColor(sf::Color::Green);
 						window.draw(line);	
-
+						if (Avera){
+							sf::CircleShape circle;
+							circle.setRadius(1);
+							circle.setFillColor(sf::Color::Red);
+							circle.setPosition(i, (high / 2) - average[i] * highi / (2 * maxi));
+							window.draw(circle);
+						}
 						
 					}
 
