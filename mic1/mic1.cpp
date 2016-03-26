@@ -20,8 +20,8 @@ using namespace std;
 int main()
 {
 	srand(time(NULL));
-	int width = 800;
-	int high = 600;
+	int width = 1366;
+	int high = 768;
 	int highi = high - 20;
 	int length = (width * 3) / 3;
 	//double scale =0.2;
@@ -38,11 +38,13 @@ int main()
 	int endingIndic = 0;
 	//const int frequency = 44100;
 	const int frequency = 64;
-	uint16_t maxi = 0;
+	uint16_t maxi = 100;
+
+	bool autoScale = true;
 
 	/*sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;*/
-	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Default);
+	sf::RenderWindow window(sf::VideoMode(width, high), "mikrofon", sf::Style::Fullscreen);
 	sf::CircleShape shape(10.f);
 	shape.setFillColor(sf::Color::Green);
 	
@@ -149,6 +151,26 @@ int main()
 		//   can get filled again, and again, and again
 		while (!(GetAsyncKeyState(VK_ESCAPE) & 0x8000))  // keep looping until the user hits escape
 		{
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Add))
+			{
+				//rotate++;
+				maxi += 100;
+				autoScale = false;
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Subtract))
+			{
+				//rotate++;
+				maxi -= 100;
+				autoScale = false;
+				if (maxi == 0){
+					maxi = 1;
+				}
+			}
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::A))
+			{
+				//rotate++;
+				autoScale = true;
+			}
 			window.clear(sf::Color::Black);
 			for (auto& h : headers)      // check each header
 			{
@@ -173,9 +195,7 @@ int main()
 						temp |= (((uint8_t)*(h.lpData + i)));
 
 						temp = abs(temp);
-						if (temp > maxi){
-							maxi = temp;
-						}
+						
 						if ((temp)<65000){
 							if (iter < n){
 								aver.push_back(temp / n);
@@ -261,8 +281,15 @@ int main()
 						
 						//std::cout << std::fixed << std::setprecision(8) << (int((uint8_t)*(h.lpData + i))) << " ";
 					}
-					
+					if (autoScale){
+						for (int i = 0; i < length; i++){
+							if (tab[i] > maxi){
+								maxi = tab[i];
+							}
+						}
+					}
 					for (int i = 0; i < length; i++){
+						
 						///*
 						//sf::RectangleShape line1(sf::Vector2f(1, (average[i])));
 						//line1.setPosition(i, (high / 2) - (average[i])/ 2);*/
@@ -297,8 +324,8 @@ int main()
 						
 					}
 
-					sf::RectangleShape scal(sf::Vector2f(1, highi));
-					scal.setPosition(5, 0+(high-highi)*0.5);
+					sf::RectangleShape scal(sf::Vector2f(1, high));
+					scal.setPosition(5, 0);
 					scal.setFillColor(sf::Color::Red);
 					window.draw(scal);
 					sf::RectangleShape scal1(sf::Vector2f(width, 1));
@@ -311,9 +338,9 @@ int main()
 					window.draw(line);
 					line.setPosition(1, 1 * high / 4);
 					window.draw(line);
-					line.setPosition(1, highi);
+					line.setPosition(1, highi + (high - highi) / 2);
 					window.draw(line);
-					line.setPosition(1, high-highi);
+					line.setPosition(1, (high-highi)/2);
 					window.draw(line);
 
 					int t = maxi / 2;
@@ -335,11 +362,14 @@ int main()
 					/*string punkts;
 					punkts = (string)punkty;*/
 					oznaczenia_skali.setString(punkts);
-					oznaczenia_skali.setPosition(12, -5 + highi);
+					oznaczenia_skali.setPosition(12, -5 + highi + (high - highi) / 2);
 					window.draw(oznaczenia_skali);
-					oznaczenia_skali.setPosition(12, -5 + high-highi);
+					oznaczenia_skali.setPosition(12, -5 + (high-highi)/2);
 					window.draw(oznaczenia_skali);
-					
+					if (autoScale){
+
+						maxi = 100;
+					}
 					std::cout << "\n";
 					// then re-add it to the queue
 					h.dwFlags = 0;          // clear the 'done' flag
