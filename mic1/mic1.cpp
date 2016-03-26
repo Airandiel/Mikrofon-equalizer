@@ -13,6 +13,7 @@
 #include <vector>
 #include <queue>
 #include <cmath>
+#include <sstream>
 
 using namespace std;
 
@@ -21,7 +22,8 @@ int main()
 	srand(time(NULL));
 	int width = 800;
 	int high = 600;
-	int length = (width * 2) / 3;
+	int highi = high - 20;
+	int length = (width * 3) / 3;
 	//double scale =0.2;
 	double scale = 0.005;
 	//double scale = 0.145;
@@ -36,6 +38,7 @@ int main()
 	int endingIndic = 0;
 	//const int frequency = 44100;
 	const int frequency = 64;
+	uint16_t maxi = 0;
 
 	/*sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;*/
@@ -43,8 +46,21 @@ int main()
 	sf::CircleShape shape(10.f);
 	shape.setFillColor(sf::Color::Green);
 	
-	vector <uint16_t> tab;
+	vector <int16_t> tab;
 	//queue <uint16_t> qu;
+
+
+
+	sf::Font font;
+	//font.loadFromFile("IndieFlower.ttf");
+	font.loadFromFile("arial.ttf");
+
+	sf::Text oznaczenia_skali;
+	oznaczenia_skali.setFont(font);
+	oznaczenia_skali.setCharacterSize(10);
+	oznaczenia_skali.setColor(sf::Color::Red);
+
+
 	for (int i = 0; i < length; i++){
 		tab.push_back(0);
 		average.push_back(0);
@@ -157,71 +173,104 @@ int main()
 						temp |= (((uint8_t)*(h.lpData + i)));
 
 						temp = abs(temp);
-						if (iter < n){
-							aver.push_back(temp / n);
-
-							aver.erase(aver.begin());
-							ave += temp / n;
-
-							average.push_back(ave);
-							average.erase(average.begin());
-							iter++;
+						if (temp > maxi){
+							maxi = temp;
 						}
-						else{
-							aver.push_back(temp / n);
+						if ((temp)<65000){
+							if (iter < n){
+								aver.push_back(temp / n);
 
-							ave += aver[aver.size()-1];
-							ave -= aver[0];
-							average.push_back(ave);
+								aver.erase(aver.begin());
+								ave += temp / n;
 
-							aver.erase(aver.begin());
-							average.erase(average.begin()-1);
-						}
-							temp-=(average[average.size()-1]);
-							temp = abs(temp);
-						if (temp < (0.5 * average[average.size() - 1])){
-							temp /= 5;
-						}
-						if (average[average.size() - 1] < 30000){
-							temp /= 10;
-						}
-						/*if (temp<30000){
-							std::cout << temp << " ";
-							/*if ((int)temp < 200){
-								tab.push_back((int)temp/2);
-							}
-							if ((int)temp > 500){
-								tab.push_back(500);
+								average.push_back(ave);
+								average.erase(average.begin());
+								iter++;
 							}
 							else{
-								tab.push_back((int)temp);
+								aver.push_back(temp / n);
+
+								ave += aver[aver.size()-1];
+								ave -= aver[0];
+								average.push_back(ave);
+
+								aver.erase(aver.begin());
+								average.erase(average.begin());
 							}
-							tab.push_back(temp);
-							tab.erase(tab.begin());
-							//qu.push(temp);
-							//qu.pop();
+							/*if (temp > average[average.size() - 1]){
+								temp -= average[average.size() - 1];
+							}
+							else{
+								temp = 0;
+							}*/
+								//temp = abs(temp);
+							/*if (temp < (0.5 * average[average.size() - 1])){
+								temp /= 50;
+							}
+							if (average[average.size() - 1] < 100){
+								temp /= 100;
+							}*/
+								std::cout << temp << " ";
+								/*if ((int)temp < 200){
+									tab.push_back((int)temp/2);
+								}
+								if ((int)temp > 500){
+									tab.push_back(500);
+								}
+								else{
+									tab.push_back((int)temp);
+								}*/
+								tab.push_back(temp);
+								tab.erase(tab.begin());
+								//qu.push(temp);
+								//qu.pop();
 						}
 						else{
-							std::cout << tab[tab.size() ] << " ";
-							tab.push_back(tab[tab.size()]);
-							tab.erase(tab.begin());
-						}*/
+							temp = 1;
+							if (iter < n){
+								aver.push_back(temp / n);
 
+								aver.erase(aver.begin());
+								ave += temp / n;
+
+								average.push_back(ave);
+								average.erase(average.begin());
+								iter++;
+							}
+							else{
+								aver.push_back(temp / n);
+
+								ave += aver[aver.size() - 1];
+								ave -= aver[0];
+								average.push_back(ave);
+
+								aver.erase(aver.begin());
+								average.erase(average.begin());
+							}
+							//std::cout << tab[tab.size()-1] << " ";
+							//tab.push_back(tab[tab.size()-1]);
+							std::cout << "1" << " ";
+							tab.push_back(1);
+							tab.erase(tab.begin());
+						}
+
+						std::cout  << average[average.size() - 1] << endl;
+						/*std::cout << average[average.size() - 1] << endl;
 						tab.push_back(temp);
-						tab.erase(tab.begin());
+						tab.erase(tab.begin());*/
 						
 						//std::cout << std::fixed << std::setprecision(8) << (int((uint8_t)*(h.lpData + i))) << " ";
 					}
 					
 					for (int i = 0; i < length; i++){
-						
-						/*sf::RectangleShape line1(sf::Vector2f(1, (average[i])));
-						line1.setPosition(i, (high / 2) - (average[i])/ 2);
+						///*
+						//sf::RectangleShape line1(sf::Vector2f(1, (average[i])));
+						//line1.setPosition(i, (high / 2) - (average[i])/ 2);*/
 
-						line1.setFillColor(sf::Color::Red);
-						window.draw(line1);*/
+						//line1.setFillColor(sf::Color::Red);
+						//window.draw(line1);
 
-						sf::CircleShape circle;
+						/*sf::CircleShape circle;
 						circle.setRadius(1);
 						circle.setFillColor(sf::Color::Red);
 						circle.setPosition(i, (high / 2) - (average[i]));
@@ -232,33 +281,64 @@ int main()
 						line1.setFillColor(sf::Color::Red);
 						window.draw(line1);
 
-						window.draw(circle);
-
-						sf::RectangleShape line(sf::Vector2f(1, (((log(abs(tab[i] )) / log(15))) / scale - cuts)));
-						line.setPosition(i, ((high / 2) - (log(abs(tab[i] )) / log(15)) / (2 * scale) + cuts / 2));
+						window.draw(circle);*/
+	
+						/*sf::RectangleShape line(sf::Vector2f(1, (((log((tab[i] )) / log(15))) / scale - cuts)));
+						line.setPosition(i, ((high / 2) - (log((tab[i] )) / log(15)) / (2 * scale) + cuts / 2));*/
 						//sf::RectangleShape line(sf::Vector2f(1, (((tab[i]) / (10)) / scale - cuts)));
 						//line.setPosition(i, (high / 2) - abs(((tab[i]/10)) / (scale) + cuts / 2)/2);
 						/*sf::RectangleShape line(sf::Vector2f(1, tab[i] / scale));
 						line.setPosition(i, (high / 2)-(tab[i]/(2*scale)));*/
+						sf::RectangleShape line(sf::Vector2f(1, tab[i]*highi/maxi));
+						line.setPosition(i, (high / 2) - tab[i] * highi / (2*maxi));
 						line.setFillColor(sf::Color::Green);
 						window.draw(line);	
 
 						
 					}
-					/*					for (int i = 0; i < (width / 2); i++){
-											sf::Vertex line[] =
-											{
-												sf::Vertex(sf::Vector2f(i, (high / 2) + (tab[i] / 2))),
-												sf::Vertex(sf::Vector2f(i, (high / 2) - (tab[i] / 2)))
-											};
 
-											window.draw(line, 1, sf::Lines);
-											window.display();
-											///here continue
-										}*/
-					/*shape.setPosition(rand() % width, rand() % high);
-					window.draw(shape);*/
-					
+					sf::RectangleShape scal(sf::Vector2f(1, highi));
+					scal.setPosition(5, 0+(high-highi)*0.5);
+					scal.setFillColor(sf::Color::Red);
+					window.draw(scal);
+					sf::RectangleShape scal1(sf::Vector2f(width, 1));
+					scal1.setPosition(0, high/2);
+					scal1.setFillColor(sf::Color::Red);
+					window.draw(scal1);
+					sf::RectangleShape line(sf::Vector2f(10, 1));
+					line.setPosition(1, 3*(highi)/4);
+					line.setFillColor(sf::Color::Red);
+					window.draw(line);
+					line.setPosition(1, 1 * high / 4);
+					window.draw(line);
+					line.setPosition(1, highi);
+					window.draw(line);
+					line.setPosition(1, high-highi);
+					window.draw(line);
+
+					int t = maxi / 2;
+					stringstream ss;
+					ss << (maxi/2);
+					string punkts;
+					ss >> punkts;
+					/*string punkts;
+					punkts = (string)punkty;*/
+					oznaczenia_skali.setString(punkts);
+					oznaczenia_skali.setPosition(12,-5 + 1 * highi / 4);
+					window.draw(oznaczenia_skali);
+					oznaczenia_skali.setPosition(12,-5 + 3 * highi / 4);
+					window.draw(oznaczenia_skali);
+
+					stringstream ss1;
+					ss1 << maxi;
+					ss1 >> punkts;
+					/*string punkts;
+					punkts = (string)punkty;*/
+					oznaczenia_skali.setString(punkts);
+					oznaczenia_skali.setPosition(12, -5 + highi);
+					window.draw(oznaczenia_skali);
+					oznaczenia_skali.setPosition(12, -5 + high-highi);
+					window.draw(oznaczenia_skali);
 					
 					std::cout << "\n";
 					// then re-add it to the queue
